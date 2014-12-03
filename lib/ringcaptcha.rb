@@ -68,14 +68,21 @@ module Ringcaptcha
     request.add_field('Content-Type', 'application/x-www-url-encoded')
     request.set_form_data params.merge!(api_key:@api_key)
 
-    begin
-      response = http.request(request)
-    rescue EOFError
+    retry_network_error do
       response = http.request(request)
     end
 
-    response = http.request(request)
     json = JSON.parse(response.body)
     return Response.new(json.symbolize_keys!)
+  end
+
+  def self.retry_network_error(max_attempts = 3)
+    max_attempts.times do |index|
+      begin
+        return yield
+      rescue EOFError
+        sleep(index*index)
+      end
+    end
   end
 end
