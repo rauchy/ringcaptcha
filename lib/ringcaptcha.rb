@@ -75,13 +75,13 @@ module Ringcaptcha
   end
 
   def self.do_http_request(http, request)
-    index = 0
+    attemps = 0
     begin
       return http.request(request)
     rescue EOFError => e
-      index = index + 1
-      if index < 3
-        sleep(index**2)
+      attemps = attemps + 1
+      if attemps < 3
+        sleep(attemps**2)
         retry
       else
         raise e
