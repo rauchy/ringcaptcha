@@ -5,7 +5,7 @@ require 'uri'
 
 module Ringcaptcha
   module API
-    def self.api(app_key, path, params = {})
+    def self.call(app_key, path, params = {})
       uri = URI.parse("https://api.ringcaptcha.com")
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
