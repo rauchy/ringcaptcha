@@ -8,37 +8,37 @@ require 'ringcaptcha/api_stub'
 
 module Ringcaptcha
   class << self
-    attr_accessor :app_key, :api_key
+    attr_accessor :api_key
 
     # returns {status: "SUCCESS",phone: "+XXXXXXXXX",country: "XX",area: "XX",block: "XXXX",subscriber: "XXXX"}
-    def normalize(phone)
-      return api.call(@api_key, @app_key, 'normalize', phone: phone)
+    def normalize(app_key, phone)
+      return api(app_key).call(@api_key, app_key, 'normalize', phone: phone)
     end
 
-    def captcha(locale: 'en_us')
-      return api.call(@api_key, @app_key, 'captcha', locale: locale)
+    def captcha(app_key, locale: 'en_us')
+      return api(app_key).call(@api_key, app_key, 'captcha', locale: locale)
     end
 
-    def code(phone, token: nil, locale: 'en_us', service: 'sms')
+    def code(app_key, phone, token: nil, locale: 'en_us', service: 'sms')
       params = {
         phone: phone,
         token: token,
         locale: locale
       }.delete_if { |k, v| v.nil? }
 
-      return api.call(@api_key, @app_key, "code/#{service}", params)
+      return api(app_key).call(@api_key, app_key, "code/#{service}", params)
     end
 
-    def verify(token, code)
-      return api.call(@api_key, @app_key, 'verify', token: token, code: code)
+    def verify(app_key, token, code)
+      return api(app_key).call(@api_key, app_key, 'verify', token: token, code: code)
     end
 
     private
 
-    def api
-      raise "please set Ringcaptcha.api_key and Ringcaptcha.app_key" if @app_key.blank? || @api_key.blank?
+    def api(app_key)
+      raise "please set Ringcaptcha.api_key" if @api_key.blank?
 
-      if @app_key.start_with?('test')
+      if app_key.start_with?('test')
         Ringcaptcha::APIStub
       else
         Ringcaptcha::API
