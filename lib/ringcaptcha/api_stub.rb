@@ -1,12 +1,13 @@
 require 'json'
+require 'ringcaptcha/response'
 
 module Ringcaptcha
   module APIStub
-    def self.call(app_key, path, params = {})
-      path = path[0...path.index('/')]
+    def self.call(api_key, app_key, path, params = {})
+      root = path.match(/^[^\/]*/).to_s
 
       parsed_json =
-        case path
+        case root
         when 'captcha'
           {
             site:          "po1e9umy6y7esi9aky2a",
@@ -55,6 +56,8 @@ module Ringcaptcha
             carrier:      "AT&T",
             threat_level: "LOW"
           }
+        else
+          raise 'I don\'t know how to stub this path'
         end
 
       return Response.new(parsed_json)
