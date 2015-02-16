@@ -1,73 +1,70 @@
 # Ringcaptcha API
-
-Set up your Ringcaptcha keys (eg in config/initializers/ringcaptcha.rb): 
-
-    Ringcaptcha.app_key = '...'
-    Ringcaptcha.api_key = '...'
-    Ringcaptcha.secret_key = '...'
+Wrapper for using [Ringcaptcha](http://ringcaptcha.com/)'s API.
 
 ## Installation
-
 Add this line to your application's Gemfile:
 
-    gem 'ringcaptcha', :git => 'https://github.com/paolodona/ringcaptcha.git'
+```ruby
+gem 'ringcaptcha', git: 'https://github.com/paolodona/ringcaptcha.git'
+```
 
 And then execute:
 
     $ bundle
+    
+## Setup
+In order to properly use the Ringcaptcha gem, it must be initialized by supplying your Ringcaptcha API key, as seen in the following code sample (which you could place in config/initializers/ringcaptcha.rb, if you are using rails):
 
-## Usage: Normalize Numbers:
+```ruby
+Ringcaptcha.api_key = '12345678901234567890' # your actual key will obviously differ from this
+```
 
-    response = Ringcaptcha.normalize('353 083 148 0349')
+## Application keys
+All calls using the gem are performed on behalf of a specific application registered with Ringcaptcha. For this reason, all calls receive an application key as their first argument. While we will denote this application key as `app_key` in all the following example, your actual application key will, of course, be different.
 
-    response #=> <Ringcaptcha::Response status="SUCCESS", phone="+353831480348", country="IE", area=nil, block=nil, subscriber=nil, type="MOBILE", carrier="Vodafone">
-    response.success?   #=> true
-    response.error?     #=> false
-    response.status     #=> "SUCCESS"
-    response.phone      #=> "+353831480349"
-    response.country    #=> "IE"
-    response.area       #=> nil
-    response.block      #=> nil
-    response.subscriber #=> nil
-    response.type       #=> "MOBILE"
-    response.carrier    #=> "Vodafone"
+## Usage
+###Normalize phone numbers:
 
-## Usage: Verifying Phone Numbers:
+```ruby
+response = Ringcaptcha.normalize('app_key', '353 083 148 0349')
 
-    # Step 1 - Get a captcha token
+response.success?   #=> true
+response.error?     #=> false
+response.status     #=> "SUCCESS"
+response.phone      #=> "+353831480349"
+response.country    #=> "IE"
+response.area       #=> nil
+response.block      #=> nil
+response.subscriber #=> nil
+response.type       #=> "MOBILE"
+response.carrier    #=> "Vodafone"
+```
 
-    locale = "de"
-    response = Ringcaptcha.captcha(locale)
-  
-    response.token # => "31b0332942cc4e274118098f95cba64f8eb413fa"
+###Verify a phone number:
 
-    # Step 2 - Send the PIN code
+```ruby
+# Step 1 - Send a PIN code to the phone number
  
-    token = response.token
-    phone = "+353831480349"
-    service = "sms"
-    Ringcaptcha.code(token, phone, service)
+phone = "+353831480349"
+service = "sms"
+code_response = Ringcaptcha.code('app_key', token, phone, service)
 
-    # Step 3 - Verify the PIN code
+# Step 2 - Verify the PIN code
 
-    code = "1234"
-    response = Ringcaptcha.verify(token, code)
+code = "1234" # You should request this from the PIN code recipient
+verification_response = Ringcaptcha.verify('app_key', code_response.token, code)
 
-    response #=> #<Ringcaptcha::Response status="SUCCESS",id="2381555c031619e61b3f81af30445b27a87ae97a", phone="+353831480349", geolocation=1, phone_type="MOBILE", carrier="Vodafone", threat_level="LOW">
+verification_response #=> #<Ringcaptcha::Response status="SUCCESS",id="2381555c031619e61b3f81af30445b27a87ae97a", phone="+353831480349", geolocation=1, phone_type="MOBILE", carrier="Vodafone", threat_level="LOW">
+```
 
-## Sending different app_keys (Multiple apps account)
+## Test mode
+The gem supports a test mode that eschews all communication with Ringcaptcha in favor of returning static, successful results. Test mode will be used if the application key supplied begins with "test", as in the example below:
 
-If you have multiple application under the same account. You can specify the app_key directly when calling individual calls.
+```ruby
+response = Ringcaptcha.verify('test_app_key', 'fake token', 'impossible code')
 
-	Ringcaptcha.api_key = '...'
-    Ringcaptcha.secret_key = '...'
-
-    my_app_key = "..."
-    response = Ringcaptcha.captcha(app_key: my_app_key)
-    Ringcaptcha.code(response.token, "+353831480349", app_key: my_app_key)
-
-    code = "1234"
-    Ringcaptcha.verify(response.token, code, app_key: my_app_key)
+response #=> #<Ringcaptcha::Response status="SUCCESS",id="UUUUUUUUUUUUUUU", phone="+1234567890", geolocation=0, phone_type="MOBILE", carrier="AT&T", threat_level="LOW">
+```
 
 ## Contributing
 
