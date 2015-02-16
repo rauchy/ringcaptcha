@@ -1,9 +1,5 @@
-require "ringcaptcha/version"
-require 'json'
-require 'ostruct'
-require 'active_support/core_ext'
-require 'uri'
-require 'net/http'
+require 'ringcaptcha/api'
+require 'ringcaptcha/api_stub'
 
 #
 # Ringcaptcha API Integration
@@ -12,79 +8,40 @@ require 'net/http'
 
 module Ringcaptcha
   class << self
-    attr_accessor :app_key, :api_key, :secret_key
-  end
+    attr_accessor :api_key
 
-  # returns {status: "SUCCESS",phone: "+XXXXXXXXX",country: "XX",area: "XX",block: "XXXX",subscriber: "XXXX"}
-  def self.normalize(phone, app_key: @app_key)
-    check_keys!(app_key: app_key)
-    return api('normalize', phone: phone)
-  end
-
-  def self.captcha(locale: 'en_us', app_key: @app_key)
-    check_keys!(app_key: app_key)
-    return api(app_key, 'captcha', locale: locale)
-  end
-
-  def self.code(phone, token: nil, locale: 'en_us', service: 'sms', app_key: @app_key)
-    check_keys!(app_key: app_key)
-
-    params = {
-      phone: phone,
-      token: token,
-      locale: locale
-    }.delete_if { |k, v| v.nil? }
-
-    return api(app_key, "code/#{service}", params)
-  end
-
-  def self.verify(token, code, app_key: @app_key)
-    check_keys!(app_key: app_key)
-    return api(app_key, 'verify', token: token, code: code)
-  end
-
-  def self.check_keys!(app_key: @app_key)
-    raise "please set Ringcaptcha.api_key and Ringcaptcha.app_key" if app_key.blank? || @api_key.blank?
-  end
-
-  class Response < OpenStruct
-    def error?
-      self.status == "ERROR"
+    # returns {status: "SUCCESS",phone: "+XXXXXXXXX",country: "XX",area: "XX",block: "XXXX",subscriber: "XXXX"}
+    def normalize(app_key, phone)
+      return api(app_key).call(@api_key, app_key, 'normalize', phone: phone)
     end
 
-    def success?
-      self.status == "SUCCESS"
+    def captcha(app_key, locale: 'en_us')
+      return api(app_key).call(@api_key, app_key, 'captcha', locale: locale)
     end
-  end
 
-  private
+    def code(app_key, phone, token: nil, locale: 'en_us', service: 'sms')
+      params = {
+        phone: phone,
+        token: token,
+        locale: locale
+      }.delete_if { |k, v| v.nil? }
 
-  def self.api(app_key, path, params = {})
-    uri = URI.parse("https://api.ringcaptcha.com")
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    request = Net::HTTP::Post.new("/#{app_key}/#{path}")
-    request.add_field('Content-Type', 'application/x-www-url-encoded')
-    request.set_form_data params.merge!(api_key:@api_key)
+      return api(app_key).call(@api_key, app_key, "code/#{service}", params)
+    end
 
-    response = do_http_request(http, request)
+    def verify(app_key, token, code)
+      return api(app_key).call(@api_key, app_key, 'verify', token: token, code: code)
+    end
 
-    json = JSON.parse(response.body)
-    return Response.new(json.symbolize_keys!)
-  end
+    private
 
-  def self.do_http_request(http, request)
-    attempts = 0
-    begin
-      return http.request(request)
-    rescue EOFError => e
-      attempts = attempts + 1
-      if attempts < 3
-        sleep(attempts**2)
-        retry
+    def api(app_key)
+      raise "please set Ringcaptcha.api_key" if @api_key.blank?
+
+      if app_key.start_with?('test')
+        Ringcaptcha::APIStub
       else
-        raise e
+        Ringcaptcha::API
       end
     end
   end
