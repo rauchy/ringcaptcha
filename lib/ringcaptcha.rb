@@ -12,11 +12,11 @@ module Ringcaptcha
 
     # returns {status: "SUCCESS",phone: "+XXXXXXXXX",country: "XX",area: "XX",block: "XXXX",subscriber: "XXXX"}
     def normalize(phone)
-      return api.call('normalize', phone: phone)
+      return api.call(@api_key, @app_key, 'normalize', phone: phone)
     end
 
     def captcha(locale: 'en_us')
-      return api.call(@app_key, 'captcha', locale: locale)
+      return api.call(@api_key, @app_key, 'captcha', locale: locale)
     end
 
     def code(phone, token: nil, locale: 'en_us', service: 'sms')
@@ -26,11 +26,11 @@ module Ringcaptcha
         locale: locale
       }.delete_if { |k, v| v.nil? }
 
-      return api.call(@app_key, "code/#{service}", params)
+      return api.call(@api_key, @app_key, "code/#{service}", params)
     end
 
     def verify(token, code)
-      return api.call(@app_key, 'verify', token: token, code: code)
+      return api.call(@api_key, @app_key, 'verify', token: token, code: code)
     end
 
     private
