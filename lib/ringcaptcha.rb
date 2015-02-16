@@ -8,29 +8,29 @@ require 'ringcaptcha/api_stub'
 
 module Ringcaptcha
   class << self
-    attr_accessor :app_key, :api_key, :secret_key
+    attr_accessor :app_key, :api_key
 
     # returns {status: "SUCCESS",phone: "+XXXXXXXXX",country: "XX",area: "XX",block: "XXXX",subscriber: "XXXX"}
-    def normalize(phone, app_key: @app_key)
+    def normalize(phone)
       return api.call('normalize', phone: phone)
     end
 
-    def captcha(locale: 'en_us', app_key: @app_key)
-      return api.call(app_key, 'captcha', locale: locale)
+    def captcha(locale: 'en_us')
+      return api.call(@app_key, 'captcha', locale: locale)
     end
 
-    def code(phone, token: nil, locale: 'en_us', service: 'sms', app_key: @app_key)
+    def code(phone, token: nil, locale: 'en_us', service: 'sms')
       params = {
         phone: phone,
         token: token,
         locale: locale
       }.delete_if { |k, v| v.nil? }
 
-      return api.call(app_key, "code/#{service}", params)
+      return api.call(@app_key, "code/#{service}", params)
     end
 
-    def verify(token, code, app_key: @app_key)
-      return api.call(app_key, 'verify', token: token, code: code)
+    def verify(token, code)
+      return api.call(@app_key, 'verify', token: token, code: code)
     end
 
     private
