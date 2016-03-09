@@ -33,6 +33,12 @@ module Ringcaptcha
       return api(app_key).call(@api_key, app_key, 'verify', token: token, code: code)
     end
 
+    def ping
+      [Ringcaptcha::API.service_up?, nil]
+    rescue StandardError => e
+      [false, e]
+    end
+
     private
 
     def api(app_key)

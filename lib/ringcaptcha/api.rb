@@ -35,5 +35,16 @@ module Ringcaptcha
         end
       end
     end
+
+    def self.service_up?
+      uri = URI.parse("https://api.ringcaptcha.com")
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+      response = http.request(Net::HTTP::Post.new("/status"))
+
+      response.is_a?(Net::HTTPSuccess) && response.body == "WE ARE ALIVE ;-)"
+    end
   end
 end
