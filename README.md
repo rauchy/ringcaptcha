@@ -11,7 +11,7 @@ gem 'ringcaptcha', git: 'https://github.com/paolodona/ringcaptcha.git'
 And then execute:
 
     $ bundle
-    
+
 ## Setup
 In order to properly use the Ringcaptcha gem, it must be initialized by supplying your Ringcaptcha API key, as seen in the following code sample (which you could place in config/initializers/ringcaptcha.rb, if you are using rails):
 
@@ -44,7 +44,7 @@ response.carrier    #=> "Vodafone"
 
 ```ruby
 # Step 1 - Send a PIN code to the phone number
- 
+
 phone = "+353831480349"
 service = "sms"
 code_response = Ringcaptcha.code('app_key', token, phone, service)
@@ -56,6 +56,16 @@ verification_response = Ringcaptcha.verify('app_key', code_response.token, code)
 
 verification_response #=> #<Ringcaptcha::Response status="SUCCESS",id="2381555c031619e61b3f81af30445b27a87ae97a", phone="+353831480349", geolocation=1, phone_type="MOBILE", carrier="Vodafone", threat_level="LOW">
 ```
+
+###Ping Ringcaptcha
+
+```ruby
+Ringcaptcha.ping
+```
+
+* In case the call succeeds, it will return [true, nil]
+* In case the call fails, it will return [false, nil]
+* In case of an error, it will return [false, error]
 
 ## Test mode
 The gem supports a test mode that eschews all communication with Ringcaptcha in favor of returning static, successful results. Test mode will be used if the application key supplied begins with "test", as in the example below:
