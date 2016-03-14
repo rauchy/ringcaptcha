@@ -42,7 +42,7 @@ module Ringcaptcha
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
-      response = http.request(Net::HTTP::Post.new("/status"))
+      response = http.request(Net::HTTP::Get.new("/status"))
 
       response.is_a?(Net::HTTPSuccess) && response.body == "WE ARE ALIVE ;-)"
     end
