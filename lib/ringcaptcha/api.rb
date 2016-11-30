@@ -3,10 +3,21 @@ require 'json'
 require 'net/http'
 require 'uri'
 require 'ringcaptcha/response'
+require 'ringcaptcha/instrumentation'
 
 module Ringcaptcha
   module API
     def self.call(api_key, app_key, path, params = {})
+      if Ringcaptcha.use_instrumentation
+        RequestInstrumentation.instrument(path, params) do
+          call_ringcaptcha(api_key, app_key, path, params = {})
+        end
+      else
+        call_ringcaptcha(api_key, app_key, path, params = {})
+      end
+    end
+
+    def self.call_ringcaptcha(api_key, app_key, path, params = {})
       uri = URI.parse("https://api.ringcaptcha.com")
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
