@@ -9,6 +9,7 @@ require 'ringcaptcha/api_stub'
 module Ringcaptcha
   class << self
     attr_accessor :api_key
+    attr_accessor :use_instrumentation
 
     # returns {status: "SUCCESS",phone: "+XXXXXXXXX",country: "XX",area: "XX",block: "XXXX",subscriber: "XXXX"}
     def normalize(app_key, phone)
@@ -37,6 +38,10 @@ module Ringcaptcha
       [Ringcaptcha::API.service_up?, nil]
     rescue StandardError => e
       [false, e]
+    end
+
+    def use_instrumentation
+      @use_instrumentation || false
     end
 
     private

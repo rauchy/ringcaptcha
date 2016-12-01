@@ -1,9 +1,16 @@
 require 'json'
 require 'ringcaptcha/response'
+require 'ringcaptcha/instrumentation'
 
 module Ringcaptcha
   module APIStub
     def self.call(api_key, app_key, path, params = {})
+      Instrumentation.instrument(path, params) do
+        call_ringcaptcha(api_key, app_key, path, params = {})
+      end
+    end
+
+    def self.call_ringcaptcha(api_key, app_key, path, params = {})
       root = path.match(/^[^\/]*/).to_s
 
       parsed_json =
