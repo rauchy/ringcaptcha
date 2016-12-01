@@ -5,11 +5,7 @@ require 'ringcaptcha/instrumentation'
 module Ringcaptcha
   module APIStub
     def self.call(api_key, app_key, path, params = {})
-      if Ringcaptcha.use_instrumentation
-        Instrumentation.instrument(path, params) do
-          call_ringcaptcha(api_key, app_key, path, params = {})
-        end
-      else
+      Instrumentation.with_instrumentation(path, params) do
         call_ringcaptcha(api_key, app_key, path, params = {})
       end
     end

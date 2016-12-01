@@ -8,11 +8,7 @@ require 'ringcaptcha/instrumentation'
 module Ringcaptcha
   module API
     def self.call(api_key, app_key, path, params = {})
-      if Ringcaptcha.use_instrumentation
-        RequestInstrumentation.instrument(path, params) do
-          call_ringcaptcha(api_key, app_key, path, params = {})
-        end
-      else
+      Instrumentation.with_instrumentation(path, params) do
         call_ringcaptcha(api_key, app_key, path, params = {})
       end
     end
