@@ -2,18 +2,6 @@ require 'active_support'
 
 module Ringcaptcha
   module Instrumentation
-    def self.with_instrumentation(path, params)
-      if Ringcaptcha.use_instrumentation
-        instrument(path, params) do
-          yield
-        end
-      else
-        yield
-      end
-    end
-
-    private
-
     # Adds ActiveSupport notification support to allow you to subscribe to these messages and print
     # more customized log messages
     #
@@ -26,6 +14,8 @@ module Ringcaptcha
     #     # Your log message
     #   end
     def self.instrument(path, params)
+      return yield unless Ringcaptcha.use_instrumentation
+
       data = {
           path: path,
           params: params
