@@ -19,6 +19,11 @@ In order to properly use the Ringcaptcha gem, it must be initialized by supplyin
 Ringcaptcha.api_key = '12345678901234567890' # your actual key will obviously differ from this
 ```
 
+You can add the following line in order to send notifications using ActiveSupport::Notifications (default false):
+```ruby
+Ringcaptcha.use_instrumentation = true
+```
+
 ## Application keys
 All calls using the gem are performed on behalf of a specific application registered with Ringcaptcha. For this reason, all calls receive an application key as their first argument. While we will denote this application key as `app_key` in all the following example, your actual application key will, of course, be different.
 
