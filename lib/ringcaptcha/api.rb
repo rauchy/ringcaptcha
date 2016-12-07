@@ -9,11 +9,11 @@ module Ringcaptcha
   module API
     def self.call(api_key, app_key, path, params = {})
       Instrumentation.instrument(path, params) do
-        call_ringcaptcha(api_key, app_key, path, params = {})
+        call_ringcaptcha(api_key, app_key, path, params)
       end
     end
 
-    def self.call_ringcaptcha(api_key, app_key, path, params = {})
+    def self.call_ringcaptcha(api_key, app_key, path, params)
       uri = URI.parse("https://api.ringcaptcha.com")
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
